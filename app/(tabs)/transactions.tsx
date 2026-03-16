@@ -30,10 +30,16 @@ function formatDate(dateStr: string) {
 }
 
 export default function TransactionsScreen() {
-  const { filteredTransactions, addTransaction, markReviewed } = useTransactions();
+  const { filteredTransactions, addTransaction } = useTransactions();
   const { categories } = useCategories();
-  const { transactionFilters, setSearchQuery, toggleCategoryFilter, toggleTypeFilter, clearFilters } =
-    useUIStore();
+  const {
+    transactionFilters,
+    setSearchQuery,
+    toggleCategoryFilter,
+    toggleTypeFilter,
+    clearFilters,
+    openTransactionSheet,
+  } = useUIStore();
 
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -175,7 +181,7 @@ export default function TransactionsScreen() {
             transaction={item}
             categoryEmoji={categoryEmojiMap[item.categoryId ?? ''] ?? '📦'}
             isLast={index === section.data.length - 1}
-            onMarkReviewed={markReviewed}
+            onPress={openTransactionSheet}
           />
         )}
         contentContainerClassName="pb-32"

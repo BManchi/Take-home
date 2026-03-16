@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useDashboard } from '../../src/hooks/useDashboard';
 import { useTransactions } from '../../src/hooks/useTransactions';
+import { useUIStore } from '../../src/stores/uiStore';
 import { SpendingLineChart } from '../../src/components/charts/SpendingLineChart';
 import { TransactionItem } from '../../src/components/cards/TransactionItem';
 import { BudgetBar } from '../../src/components/common/BudgetBar';
@@ -39,6 +40,7 @@ export default function DashboardScreen() {
     goToNextMonth,
   } = useDashboard();
   const { pendingReview, markAllReviewed } = useTransactions();
+  const { openTransactionSheet } = useUIStore();
 
   // Current day of month for budget color logic
   const today = new Date();
@@ -94,6 +96,7 @@ export default function DashboardScreen() {
                 key={txn.id}
                 transaction={txn}
                 isLast={idx === Math.min(pendingReview.length, 5) - 1}
+                onPress={openTransactionSheet}
               />
             ))}
 

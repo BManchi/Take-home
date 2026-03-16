@@ -6,7 +6,7 @@ interface Props {
   transaction: Transaction;
   categoryEmoji: string;
   isLast?: boolean;
-  onMarkReviewed: (id: string) => void;
+  onPress: (id: string) => void;
 }
 
 function formatAmount(amount: number) {
@@ -17,7 +17,7 @@ function formatAmount(amount: number) {
   return amount >= 0 ? `+$${abs}` : `-$${abs}`;
 }
 
-export function TransactionRow({ transaction: txn, categoryEmoji, isLast, onMarkReviewed }: Props) {
+export function TransactionRow({ transaction: txn, categoryEmoji, isLast, onPress }: Props) {
   const needsReview = !txn.reviewed && txn.type === 'regular';
   const hasTip = txn.tipAmount > 0 && txn.reviewed;
 
@@ -29,7 +29,7 @@ export function TransactionRow({ transaction: txn, categoryEmoji, isLast, onMark
 
   return (
     <TouchableOpacity
-      onPress={() => onMarkReviewed(txn.id)}
+      onPress={() => onPress(txn.id)}
       className="flex-row items-center py-3 px-4"
       style={!isLast ? { borderBottomWidth: 0.5, borderBottomColor: colors.separator } : undefined}
     >
