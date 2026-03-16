@@ -2,7 +2,7 @@ import 'react-native-gesture-handler'; // must be the very first import
 import '../global.css';
 
 import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -37,6 +37,7 @@ async function initDb(): Promise<void> {
 
 export default function RootLayout() {
   const colors = useColors();
+  const scheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -70,7 +71,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="light" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <BottomSheetModalProvider>
         <Stack screenOptions={{ headerShown: false }} />
         <TransactionDetailSheet />
