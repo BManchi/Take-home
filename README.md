@@ -61,7 +61,9 @@ Scan the QR code with Expo Go, or press `i` for iOS simulator / `a` for Android 
 | Recurrings | ![screenshot](./docs/result/screenshots/recurring-dark.png) | ![screenshot](./docs/result/screenshots/recurring.png)
 
 ### Video
-<video src="./docs/result/video/copilot-clone-demo.mp4" controls width="300"></video>
+https://github.com/user-attachments/assets/7bcc5207-8aa2-4b8c-bba3-254fdfa3d1a7
+
+
 
 ## Approach: AI-Orchestrated Development
 The exercise was treated as a product replication problem, not a UI-only coding task.
