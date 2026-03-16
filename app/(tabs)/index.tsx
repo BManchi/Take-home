@@ -18,7 +18,7 @@ import { BudgetBar } from '../../src/components/common/BudgetBar';
 import { UpcomingCard } from '../../src/components/cards/UpcomingCard';
 import { NetSummaryCard } from '../../src/components/cards/NetSummaryCard';
 import { UnderConstructionModal } from '../../src/components/common/UnderConstructionModal';
-import { useColors } from '../../src/theme/colors';
+import { useColors, getBudgetColor } from '../../src/theme/colors';
 
 function formatCurrency(n: number) {
   return `$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -51,6 +51,11 @@ export default function DashboardScreen() {
   const currentDay =
     today.toISOString().slice(0, 7) === selectedMonth ? today.getDate() : daysInMonth;
 
+  const isCurrentMonth = today.toISOString().slice(0, 7) === selectedMonth;
+  const paceColor = getBudgetColor(summary.totalSpent, summary.totalBudget, currentDay, daysInMonth);
+  const amountColor = summary.freeToSpend >= 0 ? colors.budgetGreen : colors.budgetRed;
+  const chartData = summary.dailySpending.slice(0, currentDay);
+
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
       <ScrollView
@@ -71,18 +76,24 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── Spending pace card ── */}
+        {/* ── Spending pace / balance card ── */}
         <View className="bg-surface dark:bg-surface-dark mx-4 rounded-xl p-5 mb-4">
           <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest mb-1">
-            Free to Spend
+            {isCurrentMonth ? 'Free to Spend' : 'Balance'}
           </Text>
-          <Text className="text-primary dark:text-primary-dark font-sans-bold text-4xl mb-4">
-            {formatCurrency(summary.freeToSpend)}
+          <Text style={{ color: amountColor, fontFamily: 'Inter_700Bold', fontSize: 40, marginBottom: 2 }}>
+            {summary.freeToSpend < 0 ? '-' : ''}{formatCurrency(summary.freeToSpend)}
           </Text>
-          <SpendingLineChart
-            data={summary.dailySpending}
-            totalBudget={summary.totalBudget}
-          />
+          <Text className="text-secondary dark:text-secondary-dark font-sans text-sm" style={{ marginBottom: isCurrentMonth ? 16 : 0 }}>
+            {formatCurrency(summary.totalSpent)} spent · {formatCurrency(summary.totalBudget)} budget
+          </Text>
+          {isCurrentMonth && (
+            <SpendingLineChart
+              data={chartData}
+              totalBudget={summary.totalBudget}
+              lineColor={paceColor}
+            />
+          )}
         </View>
 
         {/* ── To Review ── */}
