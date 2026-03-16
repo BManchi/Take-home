@@ -18,6 +18,26 @@ Clone this app to the best of your ability in < 6 hours. Implement everything ex
 - Quality bar: Functional, usable, visually close to the original
 
 
+## Setup
+
+### Prerequisites
+- Node.js 18+
+- [Expo Go](https://expo.dev/go) app on your iOS or Android device, **or** a configured iOS Simulator / Android Emulator
+
+### Run
+
+```bash
+cd copilot-clone
+npm install
+npx expo start
+```
+
+Scan the QR code with Expo Go, or press `i` for iOS simulator / `a` for Android emulator.
+
+> The app uses a local SQLite database seeded with mock data on first launch — no accounts or API keys required.
+
+---
+
 ## Result
 ### Screens implemented
 1. Dashboard
