@@ -4,7 +4,7 @@
  * Sections: SpendingGraph, ToReview, Budgets, Upcoming, NetThisMonth.
  * Data: useDashboard() + useTransactions() hooks → Zustand stores.
  */
-import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -20,6 +20,10 @@ import { colors } from '../../src/theme/colors';
 
 function formatCurrency(n: number) {
   return `$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function underConstruction() {
+  Alert.alert('Under Construction', 'This feature is coming soon! 🚧');
 }
 
 function formatMonth(ym: string) {
@@ -89,7 +93,9 @@ export default function DashboardScreen() {
               <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
                 To Review ({pendingReview.length})
               </Text>
+              <TouchableOpacity onPress={underConstruction}>
               <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
+            </TouchableOpacity>
             </View>
 
             {pendingReview.slice(0, 5).map((txn, idx) => (
@@ -122,7 +128,9 @@ export default function DashboardScreen() {
             <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
               Budgets
             </Text>
-            <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
+            <TouchableOpacity onPress={underConstruction}>
+              <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
+            </TouchableOpacity>
           </View>
 
           {topBudgetCategories.map(({ category, spent }) => (
@@ -143,7 +151,9 @@ export default function DashboardScreen() {
               <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
                 Upcoming
               </Text>
-              <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
+              <TouchableOpacity onPress={underConstruction}>
+                <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
+              </TouchableOpacity>
             </View>
             <ScrollView
               horizontal

@@ -1,6 +1,10 @@
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import type { MonthlySpendingSummary } from '../../types';
 import { colors } from '../../theme/colors';
+
+function underConstruction() {
+  Alert.alert('Under Construction', 'This feature is coming soon! 🚧');
+}
 
 interface Props {
   summary: MonthlySpendingSummary;
@@ -44,7 +48,9 @@ export function NetSummaryCard({ summary }: Props) {
         <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
           Net This Month
         </Text>
-        <Text className="text-accent font-sans-md text-sm">cash flow &gt;</Text>
+        <TouchableOpacity onPress={underConstruction}>
+          <Text className="text-accent font-sans-md text-sm">cash flow &gt;</Text>
+        </TouchableOpacity>
       </View>
 
       <View className="flex-row">
