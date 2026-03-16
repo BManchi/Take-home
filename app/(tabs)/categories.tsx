@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useCategories } from '../../src/hooks/useCategories';
 import { useTransactions } from '../../src/hooks/useTransactions';
 import { useUIStore } from '../../src/stores/uiStore';
@@ -106,13 +107,13 @@ export default function CategoriesScreen() {
       >
         {/* Month selector */}
         <View className="flex-row items-center justify-center py-4">
-          <TouchableOpacity onPress={goToPrevMonth} className="p-2">
+          <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToPrevMonth(); }} className="p-2">
             <ChevronLeft color={colors.textSecondary} size={20} />
           </TouchableOpacity>
           <Text className="text-primary font-sans-semi text-lg mx-3">
             {formatMonth(selectedMonth)}
           </Text>
-          <TouchableOpacity onPress={goToNextMonth} className="p-2">
+          <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToNextMonth(); }} className="p-2">
             <ChevronRight color={colors.textSecondary} size={20} />
           </TouchableOpacity>
         </View>
@@ -145,10 +146,21 @@ export default function CategoriesScreen() {
         </View>
 
         {/* Category rows */}
+        {categoriesBySpend.length === 0 && (
+          <View className="items-center py-16">
+            <Text className="text-4xl mb-3">📊</Text>
+            <Text className="text-secondary font-sans text-base">No categories yet</Text>
+          </View>
+        )}
+
         {categoriesBySpend.map((cat) => (
           <TouchableOpacity
             key={cat.id}
-            onPress={() => openCategorySheet(cat.id)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              openCategorySheet(cat.id);
+            }}
+            activeOpacity={0.7}
             className="bg-surface rounded-xl p-4 mb-2"
           >
             <BudgetBar

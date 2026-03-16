@@ -9,6 +9,7 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Switch, StyleSheet } from 'react-native';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { X, Check } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useTransactions } from '../../hooks/useTransactions';
 import { useCategories } from '../../hooks/useCategories';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -98,6 +99,7 @@ export function TransactionDetailSheet() {
       notes,
       isExcluded,
     });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     closeTransactionSheet();
   }
 

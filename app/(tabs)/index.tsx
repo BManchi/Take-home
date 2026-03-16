@@ -7,6 +7,7 @@
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useDashboard } from '../../src/hooks/useDashboard';
 import { useTransactions } from '../../src/hooks/useTransactions';
 import { useUIStore } from '../../src/stores/uiStore';
@@ -56,13 +57,13 @@ export default function DashboardScreen() {
       >
         {/* ── Month selector ── */}
         <View className="flex-row items-center justify-center py-4">
-          <TouchableOpacity onPress={goToPrevMonth} className="p-2">
+          <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToPrevMonth(); }} className="p-2">
             <ChevronLeft color={colors.textSecondary} size={20} />
           </TouchableOpacity>
           <Text className="text-primary font-sans-semi text-lg mx-3">
             {formatMonth(selectedMonth)}
           </Text>
-          <TouchableOpacity onPress={goToNextMonth} className="p-2">
+          <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToNextMonth(); }} className="p-2">
             <ChevronRight color={colors.textSecondary} size={20} />
           </TouchableOpacity>
         </View>
@@ -101,7 +102,10 @@ export default function DashboardScreen() {
             ))}
 
             <TouchableOpacity
-              onPress={() => markAllReviewed(pendingReview.map((t) => t.id))}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                markAllReviewed(pendingReview.map((t) => t.id));
+              }}
               className="mt-3 py-2.5 items-center border rounded-lg"
               style={{ borderColor: colors.separator }}
             >

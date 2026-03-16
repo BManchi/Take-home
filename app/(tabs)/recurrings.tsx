@@ -9,6 +9,7 @@
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useAccountStore } from '../../src/stores/accountStore';
 import { colors } from '../../src/theme/colors';
 
@@ -46,8 +47,15 @@ export default function RecurringsScreen() {
         <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 10 }}>
           This Month
         </Text>
+        {active.length === 0 && (
+          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+            <Text style={{ fontSize: 36, marginBottom: 8 }}>🔄</Text>
+            <Text style={{ color: colors.textSecondary, fontFamily: 'Inter_400Regular', fontSize: 14 }}>No recurring transactions yet</Text>
+          </View>
+        )}
+
         {active.map((r) => (
-          <TouchableOpacity key={r.id} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity key={r.id} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }} activeOpacity={0.7}>
             <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.surfaceRaised, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
               <Text style={{ fontSize: 22 }}>{r.emoji}</Text>
             </View>
@@ -70,8 +78,16 @@ export default function RecurringsScreen() {
             </Text>
             {paused.map((r) => (
               <View key={r.id} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, opacity: 0.5, flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 22, marginRight: 12 }}>{r.emoji}</Text>
-                <Text style={{ color: colors.textSecondary, fontSize: 15, fontFamily: 'Inter_500Medium' }}>{r.name}</Text>
+                <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.surfaceRaised, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                  <Text style={{ fontSize: 22 }}>{r.emoji}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: colors.textSecondary, fontSize: 15, fontFamily: 'Inter_500Medium' }}>{r.name}</Text>
+                  <Text style={{ color: colors.textTertiary, fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 2 }}>Paused</Text>
+                </View>
+                <Text style={{ color: colors.textTertiary, fontSize: 16, fontFamily: 'Inter_700Bold' }}>
+                  {formatCurrency(r.expectedAmount)}
+                </Text>
               </View>
             ))}
           </>

@@ -7,6 +7,7 @@
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, TrendingUp, TrendingDown } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useAccounts } from '../../src/hooks/useAccounts';
 import { NetWorthChart } from '../../src/components/charts/NetWorthChart';
 import { colors, getUtilizationColor } from '../../src/theme/colors';
@@ -33,9 +34,10 @@ const ALERT_SURFACE = '#2C1B0E';
 interface AccountRowProps {
   account: Account;
   change?: { delta: number; percent: number };
+  isLast?: boolean;
 }
 
-function AccountRow({ account, change }: AccountRowProps) {
+function AccountRow({ account, change, isLast }: AccountRowProps) {
   const isCredit = account.type === 'credit_card';
   const isPositiveChange = (change?.delta ?? 0) >= 0;
 
@@ -45,7 +47,7 @@ function AccountRow({ account, change }: AccountRowProps) {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 12,
-        borderBottomWidth: 0.5,
+        borderBottomWidth: isLast ? 0 : 0.5,
         borderBottomColor: colors.separator,
       }}
       activeOpacity={0.7}
@@ -149,7 +151,7 @@ export default function AccountsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
         {/* ── Header ── */}
         <View
           style={{
@@ -252,7 +254,10 @@ export default function AccountsScreen() {
             {TIME_RANGES.map((range) => (
               <TouchableOpacity
                 key={range}
-                onPress={() => setNetWorthTimeRange(range)}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setNetWorthTimeRange(range);
+                }}
                 style={{
                   paddingHorizontal: 10,
                   paddingVertical: 4,
@@ -422,11 +427,12 @@ export default function AccountsScreen() {
               </Text>
             </View>
 
-            {accounts.map((acc) => (
+            {accounts.map((acc, idx) => (
               <AccountRow
                 key={acc.id}
                 account={acc}
                 change={accountChanges[acc.id]}
+                isLast={idx === accounts.length - 1}
               />
             ))}
           </View>

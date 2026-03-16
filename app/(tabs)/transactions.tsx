@@ -4,9 +4,10 @@
  * Search bar, filter chips, date-grouped SectionList, FAB, AddTransactionSheet.
  */
 import { useMemo, useState } from 'react';
-import { View, Text, TextInput, SectionList, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, SectionList, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Plus } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useTransactions } from '../../src/hooks/useTransactions';
 import { useCategories } from '../../src/hooks/useCategories';
 import { useUIStore } from '../../src/stores/uiStore';
@@ -30,7 +31,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function TransactionsScreen() {
-  const { filteredTransactions, addTransaction } = useTransactions();
+  const { filteredTransactions, addTransaction, isLoading } = useTransactions();
   const { categories } = useCategories();
   const {
     transactionFilters,
@@ -96,6 +97,7 @@ export default function TransactionsScreen() {
           label="Category"
           active={categoryIds.length > 0}
           onPress={() => {
+            Haptics.selectionAsync();
             setShowCategoryPicker((p) => !p);
             setShowTypePicker(false);
           }}
@@ -104,6 +106,7 @@ export default function TransactionsScreen() {
           label="Type"
           active={types.length > 0}
           onPress={() => {
+            Haptics.selectionAsync();
             setShowTypePicker((p) => !p);
             setShowCategoryPicker(false);
           }}
@@ -164,33 +167,57 @@ export default function TransactionsScreen() {
         </View>
       )}
 
+      {/* Loading state */}
+      {isLoading && (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color={colors.accent} />
+        </View>
+      )}
+
       {/* Transaction list */}
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        stickySectionHeadersEnabled={false}
-        renderSectionHeader={({ section }) => (
-          <View className="px-4 py-2 bg-background">
-            <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
-              {section.title}
-            </Text>
-          </View>
-        )}
-        renderItem={({ item, index, section }) => (
-          <TransactionRow
-            transaction={item}
-            categoryEmoji={categoryEmojiMap[item.categoryId ?? ''] ?? '📦'}
-            isLast={index === section.data.length - 1}
-            onPress={openTransactionSheet}
-          />
-        )}
-        contentContainerClassName="pb-32"
-      />
+      {!isLoading && (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          stickySectionHeadersEnabled={false}
+          showsVerticalScrollIndicator={false}
+          renderSectionHeader={({ section }) => (
+            <View className="px-4 py-2 bg-background">
+              <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
+                {section.title}
+              </Text>
+            </View>
+          )}
+          renderItem={({ item, index, section }) => (
+            <TransactionRow
+              transaction={item}
+              categoryEmoji={categoryEmojiMap[item.categoryId ?? ''] ?? '📦'}
+              isLast={index === section.data.length - 1}
+              onPress={openTransactionSheet}
+            />
+          )}
+          ListEmptyComponent={
+            <View className="items-center py-20 px-8">
+              <Text className="text-4xl mb-3">🔍</Text>
+              <Text className="text-primary font-sans-semi text-base mb-1">No transactions</Text>
+              <Text className="text-secondary font-sans text-sm text-center">
+                {hasActiveFilters || transactionFilters.searchQuery
+                  ? 'Try adjusting your filters or search'
+                  : 'Your transactions will appear here'}
+              </Text>
+            </View>
+          }
+          contentContainerClassName="pb-32"
+        />
+      )}
 
       {/* FAB */}
       <View className="absolute bottom-6 right-6">
         <TouchableOpacity
-          onPress={() => setAddSheetVisible(true)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            setAddSheetVisible(true);
+          }}
           className="w-14 h-14 bg-accent rounded-full items-center justify-center"
           style={FAB_SHADOW}
         >

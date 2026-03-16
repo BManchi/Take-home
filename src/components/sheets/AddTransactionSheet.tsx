@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { X } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useCategories } from '../../hooks/useCategories';
 import type { Transaction, TransactionType } from '../../types';
 import { colors } from '../../theme/colors';
@@ -56,7 +57,10 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
 
   function handleSubmit() {
     const parsedAmount = parseFloat(amount);
-    if (!merchant.trim() || isNaN(parsedAmount)) return;
+    if (!merchant.trim() || isNaN(parsedAmount)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
 
     const txn: Transaction = {
       id: `manual-${Date.now()}`,
@@ -85,6 +89,7 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
       originalCurrencyAmount: null,
     };
 
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onSubmit(txn);
     resetForm();
   }
