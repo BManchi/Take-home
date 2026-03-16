@@ -1,148 +1,204 @@
 /**
- * Transaction List Screen
+ * Transactions Screen — PRD §2.3
  *
- * PRD §2.3 — Search bar, filter chips, month-grouped list with dot indicators,
- * and type badges [R] [I] [T].
- *
- * Build task: extract TransactionRow, FilterChipRow, and TransactionDetailSheet
- * into src/components/.
+ * Search bar, filter chips, date-grouped SectionList, FAB, AddTransactionSheet.
  */
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  SectionList,
-  TouchableOpacity,
-} from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, TextInput, SectionList, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
+import { Search, Plus } from 'lucide-react-native';
 import { useTransactions } from '../../src/hooks/useTransactions';
-import { useCategoryStore } from '../../src/stores/categoryStore';
+import { useCategories } from '../../src/hooks/useCategories';
 import { useUIStore } from '../../src/stores/uiStore';
+import { TransactionRow } from '../../src/components/cards/TransactionRow';
+import { FilterChip } from '../../src/components/common/FilterChip';
+import { AddTransactionSheet } from '../../src/components/sheets/AddTransactionSheet';
 import { colors } from '../../src/theme/colors';
 import type { Transaction } from '../../src/types';
 
-function formatAmount(n: number) {
-  const formatted = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return n < 0 ? `-$${formatted}` : `+$${formatted}`;
-}
+const FAB_SHADOW = {
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 8,
+};
 
-function formatMonth(ym: string) {
-  const [y, m] = ym.split('-');
-  return new Date(Number(y), Number(m) - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
-}
-
-function DotIndicator({ txn }: { txn: Transaction }) {
-  if (!txn.reviewed && txn.type === 'regular') {
-    return <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.dotReview, marginRight: 10 }} />;
-  }
-  if (txn.tipAmount > 0) {
-    return <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.dotTip, marginRight: 10 }} />;
-  }
-  return <View style={{ width: 8, height: 8, marginRight: 10 }} />;
-}
-
-function TypeBadge({ type, isRecurring }: { type: string; isRecurring: boolean }) {
-  if (isRecurring) return <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: 'Inter_600SemiBold', marginLeft: 4 }}>[R]</Text>;
-  if (type === 'income') return <Text style={{ color: colors.incomeGreen, fontSize: 11, fontFamily: 'Inter_600SemiBold', marginLeft: 4 }}>[I]</Text>;
-  if (type === 'internal_transfer') return <Text style={{ color: colors.accent, fontSize: 11, fontFamily: 'Inter_600SemiBold', marginLeft: 4 }}>[T]</Text>;
-  return null;
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 }
 
 export default function TransactionsScreen() {
-  const { groupedByMonth } = useTransactions();
-  const { categories } = useCategoryStore();
-  const { transactionFilters, setSearchQuery } = useUIStore();
+  const { filteredTransactions, addTransaction, markReviewed } = useTransactions();
+  const { categories } = useCategories();
+  const { transactionFilters, setSearchQuery, toggleCategoryFilter, toggleTypeFilter, clearFilters } =
+    useUIStore();
 
-  const sections = groupedByMonth.map((group) => ({
-    title: `${formatMonth(group.month)}  ·  $${group.totalSpent.toFixed(0)} spent`,
-    data: group.transactions,
-  }));
+  const [addSheetVisible, setAddSheetVisible] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
 
-  const getCategoryEmoji = (categoryId: string | null) =>
-    categories.find((c) => c.id === categoryId)?.emoji ?? '📦';
+  const categoryEmojiMap = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c.emoji])),
+    [categories],
+  );
+
+  const sections = useMemo(() => {
+    const dateMap: Record<string, Transaction[]> = {};
+    for (const txn of filteredTransactions) {
+      if (!dateMap[txn.date]) dateMap[txn.date] = [];
+      dateMap[txn.date].push(txn);
+    }
+    return Object.entries(dateMap)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, txns]) => ({
+        date,
+        title: formatDate(date),
+        data: txns,
+      }));
+  }, [filteredTransactions]);
+
+  const hasActiveFilters =
+    transactionFilters.categoryIds.length > 0 || transactionFilters.types.length > 0;
+
+  const { categoryIds, types, searchQuery } = transactionFilters;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView className="flex-1 bg-background">
       {/* Search bar */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 10 }}>
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.input, borderRadius: 10, paddingHorizontal: 12 }}>
+      <View className="flex-row items-center px-4 py-2.5 gap-2.5">
+        <View className="flex-1 flex-row items-center bg-input rounded-xl px-3">
+          <Search color={colors.textTertiary} size={16} />
           <TextInput
-            placeholder="Search transactions..."
+            placeholder="Search..."
             placeholderTextColor={colors.textTertiary}
-            value={transactionFilters.searchQuery}
+            value={searchQuery}
             onChangeText={setSearchQuery}
-            style={{ flex: 1, color: colors.textPrimary, fontSize: 15, fontFamily: 'Inter_400Regular', paddingVertical: 10 }}
+            className="flex-1 text-primary font-sans text-base py-2.5 ml-2"
           />
         </View>
-        <TouchableOpacity style={{ width: 36, height: 36, backgroundColor: colors.accent, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
-          <Plus color="#fff" size={18} />
-        </TouchableOpacity>
       </View>
 
-      {/* Filter chips (placeholder row) */}
-      <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 10, gap: 8 }}>
-        {['Category', 'Type', 'Tags', 'Account'].map((label) => (
-          <View key={label} style={{ backgroundColor: colors.input, borderRadius: 100, paddingHorizontal: 12, paddingVertical: 5 }}>
-            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: 'Inter_500Medium' }}>{label} ▾</Text>
-          </View>
-        ))}
-      </View>
+      {/* Filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="px-4 pb-2 gap-2 flex-row"
+      >
+        <FilterChip
+          label="Category"
+          active={categoryIds.length > 0}
+          onPress={() => {
+            setShowCategoryPicker((p) => !p);
+            setShowTypePicker(false);
+          }}
+        />
+        <FilterChip
+          label="Type"
+          active={types.length > 0}
+          onPress={() => {
+            setShowTypePicker((p) => !p);
+            setShowCategoryPicker(false);
+          }}
+        />
+        {hasActiveFilters && (
+          <TouchableOpacity onPress={clearFilters} className="px-3 py-1.5 justify-center">
+            <Text className="text-accent font-sans-md text-sm">Clear</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+
+      {/* Inline category picker */}
+      {showCategoryPicker && (
+        <View className="bg-surface-raised mx-4 mb-2 rounded-xl overflow-hidden">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="p-2">
+            <View className="flex-row gap-2">
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat.id}
+                  onPress={() => toggleCategoryFilter(cat.id)}
+                  className={`flex-row items-center rounded-full px-3 py-1.5 ${
+                    categoryIds.includes(cat.id) ? 'bg-accent' : 'bg-input'
+                  }`}
+                >
+                  <Text className="text-base mr-1">{cat.emoji}</Text>
+                  <Text
+                    className={`font-sans-md text-sm ${
+                      categoryIds.includes(cat.id) ? 'text-white' : 'text-secondary'
+                    }`}
+                  >
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Inline type picker */}
+      {showTypePicker && (
+        <View className="flex-row gap-2 px-4 mb-2">
+          {(['regular', 'income', 'internal_transfer'] as const).map((t) => (
+            <TouchableOpacity
+              key={t}
+              onPress={() => toggleTypeFilter(t)}
+              className={`flex-1 items-center py-1.5 rounded-full ${
+                types.includes(t) ? 'bg-accent' : 'bg-input'
+              }`}
+            >
+              <Text
+                className={`font-sans-md text-sm ${types.includes(t) ? 'text-white' : 'text-secondary'}`}
+              >
+                {t === 'regular' ? 'Regular' : t === 'income' ? 'Income' : 'Transfer'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* Transaction list */}
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
+        stickySectionHeadersEnabled={false}
         renderSectionHeader={({ section }) => (
-          <View style={{ paddingHorizontal: 16, paddingVertical: 8, backgroundColor: colors.background }}>
-            <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 }}>
+          <View className="px-4 py-2 bg-background">
+            <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
               {section.title}
             </Text>
           </View>
         )}
-        renderItem={({ item: txn }) => (
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-              borderBottomWidth: 0.5,
-              borderBottomColor: colors.separator,
-            }}
-          >
-            <DotIndicator txn={txn} />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ color: colors.textPrimary, fontSize: 15, fontFamily: 'Inter_400Regular' }}>
-                  {txn.merchantName}
-                </Text>
-                <TypeBadge type={txn.type} isRecurring={txn.isRecurring} />
-              </View>
-              {txn.tags.length > 0 && (
-                <View style={{ flexDirection: 'row', gap: 4, marginTop: 2 }}>
-                  {txn.tags.map((tag) => (
-                    <View key={tag} style={{ backgroundColor: colors.surfaceRaised, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 1 }}>
-                      <Text style={{ color: colors.textSecondary, fontSize: 11 }}>{tag}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-            <Text style={{ fontSize: 20, marginHorizontal: 10 }}>
-              {getCategoryEmoji(txn.categoryId)}
-            </Text>
-            <Text style={{
-              color: txn.amount > 0 ? colors.incomeGreen : colors.textPrimary,
-              fontSize: 15,
-              fontFamily: 'Inter_600SemiBold',
-            }}>
-              {formatAmount(txn.amount)}
-            </Text>
-          </TouchableOpacity>
+        renderItem={({ item, index, section }) => (
+          <TransactionRow
+            transaction={item}
+            categoryEmoji={categoryEmojiMap[item.categoryId ?? ''] ?? '📦'}
+            isLast={index === section.data.length - 1}
+            onMarkReviewed={markReviewed}
+          />
         )}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerClassName="pb-32"
+      />
+
+      {/* FAB */}
+      <View className="absolute bottom-6 right-6">
+        <TouchableOpacity
+          onPress={() => setAddSheetVisible(true)}
+          className="w-14 h-14 bg-accent rounded-full items-center justify-center"
+          style={FAB_SHADOW}
+        >
+          <Plus color="#fff" size={24} />
+        </TouchableOpacity>
+      </View>
+
+      <AddTransactionSheet
+        visible={addSheetVisible}
+        onClose={() => setAddSheetVisible(false)}
+        onSubmit={(txn) => {
+          addTransaction(txn);
+          setAddSheetVisible(false);
+        }}
       />
     </SafeAreaView>
   );
