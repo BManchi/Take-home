@@ -13,7 +13,7 @@ import { X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useCategories } from '../../hooks/useCategories';
 import type { Transaction, TransactionType } from '../../types';
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/colors';
 
 interface Props {
   visible: boolean;
@@ -29,9 +29,8 @@ const TYPES: { key: TransactionType; label: string }[] = [
   { key: 'internal_transfer', label: 'Transfer' },
 ];
 
-const inputClass = 'bg-input rounded-xl px-4 py-3 mb-3 text-primary font-sans text-base';
-
 export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
+  const colors = useColors();
   const { categories } = useCategories();
 
   const [merchant, setMerchant] = useState('');
@@ -96,6 +95,17 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
 
+  const inputStyle = {
+    backgroundColor: colors.input,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 12,
+    color: colors.textPrimary,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 16,
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -105,19 +115,19 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1 bg-surface-raised"
+        style={{ flex: 1, backgroundColor: colors.surfaceRaised }}
       >
-        <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
-          <Text className="font-sans-bold text-xl text-primary">Add Transaction</Text>
-          <TouchableOpacity onPress={handleClose} className="p-2">
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
+          <Text style={{ color: colors.textPrimary, fontFamily: 'Inter_700Bold', fontSize: 20 }}>Add Transaction</Text>
+          <TouchableOpacity onPress={handleClose} style={{ padding: 8 }}>
             <X color={colors.textSecondary} size={20} />
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 px-4 pt-2" keyboardShouldPersistTaps="handled">
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
           {/* Merchant */}
           <TextInput
-            className={inputClass}
+            style={inputStyle}
             placeholder="Merchant name"
             placeholderTextColor={colors.textTertiary}
             value={merchant}
@@ -126,7 +136,7 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
 
           {/* Amount */}
           <TextInput
-            className={inputClass}
+            style={inputStyle}
             placeholder="Amount"
             placeholderTextColor={colors.textTertiary}
             keyboardType="decimal-pad"
@@ -136,7 +146,7 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
 
           {/* Date */}
           <TextInput
-            className={inputClass}
+            style={inputStyle}
             placeholder="Date (YYYY-MM-DD)"
             placeholderTextColor={colors.textTertiary}
             value={date}
@@ -144,14 +154,20 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
           />
 
           {/* Type toggles */}
-          <View className="flex-row gap-2 mb-3">
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
             {TYPES.map(({ key, label }) => (
               <TouchableOpacity
                 key={key}
                 onPress={() => setType(key)}
-                className={`flex-1 items-center py-2.5 rounded-xl ${type === key ? 'bg-accent' : 'bg-input'}`}
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  paddingVertical: 10,
+                  borderRadius: 12,
+                  backgroundColor: type === key ? colors.accent : colors.input,
+                }}
               >
-                <Text className={`font-sans-md text-sm ${type === key ? 'text-white' : 'text-secondary'}`}>
+                <Text style={{ color: type === key ? '#fff' : colors.textSecondary, fontFamily: 'Inter_500Medium', fontSize: 14 }}>
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -160,30 +176,26 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
 
           {/* Category picker */}
           <TouchableOpacity
-            className="bg-input rounded-xl px-4 py-3 mb-3 flex-row justify-between items-center"
+            style={{ ...inputStyle, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
             onPress={() => setShowCategoryList((v) => !v)}
           >
-            <Text className="text-primary font-sans text-base">
+            <Text style={{ color: colors.textPrimary, fontFamily: 'Inter_400Regular', fontSize: 16 }}>
               {selectedCategory ? `${selectedCategory.emoji} ${selectedCategory.name}` : 'Select category'}
             </Text>
-            <Text className="text-secondary">{showCategoryList ? '▲' : '▼'}</Text>
+            <Text style={{ color: colors.textSecondary }}>{showCategoryList ? '▲' : '▼'}</Text>
           </TouchableOpacity>
 
           {showCategoryList && (
-            <View className="bg-surface rounded-xl mb-3 overflow-hidden">
+            <View style={{ backgroundColor: colors.surface, borderRadius: 12, marginBottom: 12, overflow: 'hidden' }}>
               <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
                 {categories.map((cat) => (
                   <TouchableOpacity
                     key={cat.id}
-                    onPress={() => {
-                      setCategoryId(cat.id);
-                      setShowCategoryList(false);
-                    }}
-                    className="flex-row items-center px-4 py-3"
-                    style={{ borderBottomWidth: 0.5, borderBottomColor: colors.separator }}
+                    onPress={() => { setCategoryId(cat.id); setShowCategoryList(false); }}
+                    style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: colors.separator }}
                   >
-                    <Text className="text-base mr-2">{cat.emoji}</Text>
-                    <Text className={`font-sans text-base ${categoryId === cat.id ? 'text-accent' : 'text-primary'}`}>
+                    <Text style={{ fontSize: 16, marginRight: 8 }}>{cat.emoji}</Text>
+                    <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 16, color: categoryId === cat.id ? colors.accent : colors.textPrimary }}>
                       {cat.name}
                     </Text>
                   </TouchableOpacity>
@@ -195,9 +207,9 @@ export function AddTransactionSheet({ visible, onClose, onSubmit }: Props) {
           {/* Submit */}
           <TouchableOpacity
             onPress={handleSubmit}
-            className="bg-accent rounded-xl py-3 items-center mb-8"
+            style={{ backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 32 }}
           >
-            <Text className="text-white font-sans-bold text-base">Add Transaction</Text>
+            <Text style={{ color: '#fff', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Add Transaction</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

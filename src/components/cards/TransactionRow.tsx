@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import type { Transaction } from '../../types';
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/colors';
 
 interface Props {
   transaction: Transaction;
@@ -18,6 +18,7 @@ function formatAmount(amount: number) {
 }
 
 export function TransactionRow({ transaction: txn, categoryEmoji, isLast, onPress }: Props) {
+  const colors = useColors();
   const needsReview = !txn.reviewed && txn.type === 'regular';
   const hasTip = txn.tipAmount > 0 && txn.reviewed;
 
@@ -34,19 +35,16 @@ export function TransactionRow({ transaction: txn, categoryEmoji, isLast, onPres
       style={!isLast ? { borderBottomWidth: 0.5, borderBottomColor: colors.separator } : undefined}
     >
       {/* Review dot */}
-      <View
-        className="w-2 h-2 rounded-full mr-3"
-        style={{ backgroundColor: dotColor }}
-      />
+      <View className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: dotColor }} />
 
       {/* Merchant + tags */}
       <View className="flex-1 mr-2">
-        <Text className="text-primary font-sans text-base">{txn.merchantName}</Text>
+        <Text className="text-primary dark:text-primary-dark font-sans text-base">{txn.merchantName}</Text>
         {txn.tags.length > 0 && (
           <View className="flex-row flex-wrap gap-1 mt-0.5">
             {txn.tags.map((tag) => (
-              <View key={tag} className="bg-surface-raised rounded px-1.5 py-0.5">
-                <Text className="text-tertiary text-xs">{tag}</Text>
+              <View key={tag} className="bg-surface-raised dark:bg-surface-raised-dark rounded px-1.5 py-0.5">
+                <Text className="text-tertiary dark:text-tertiary-dark text-xs">{tag}</Text>
               </View>
             ))}
           </View>
@@ -58,19 +56,13 @@ export function TransactionRow({ transaction: txn, categoryEmoji, isLast, onPres
 
       {/* Type badge */}
       {txn.type === 'income' && (
-        <Text className="font-sans-md text-xs mr-2" style={{ color: colors.incomeGreen }}>
-          [I]
-        </Text>
+        <Text className="font-sans-md text-xs mr-2" style={{ color: colors.incomeGreen }}>[I]</Text>
       )}
       {txn.type === 'internal_transfer' && (
-        <Text className="font-sans-md text-xs mr-2" style={{ color: colors.accent }}>
-          [T]
-        </Text>
+        <Text className="font-sans-md text-xs mr-2" style={{ color: colors.accent }}>[T]</Text>
       )}
       {txn.isRecurring && txn.type === 'regular' && (
-        <Text className="font-sans-md text-xs mr-2" style={{ color: colors.textTertiary }}>
-          [R]
-        </Text>
+        <Text className="font-sans-md text-xs mr-2" style={{ color: colors.textTertiary }}>[R]</Text>
       )}
 
       {/* Amount */}

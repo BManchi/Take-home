@@ -1,10 +1,8 @@
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import type { MonthlySpendingSummary } from '../../types';
-import { colors } from '../../theme/colors';
-
-function underConstruction() {
-  Alert.alert('Under Construction', 'This feature is coming soon! 🚧');
-}
+import { useColors } from '../../theme/colors';
+import { UnderConstructionModal } from '../common/UnderConstructionModal';
 
 interface Props {
   summary: MonthlySpendingSummary;
@@ -21,12 +19,13 @@ interface ColProps {
 }
 
 function SummaryCol({ label, value, delta }: ColProps) {
+  const colors = useColors();
   return (
     <View className="items-center flex-1">
-      <Text className="text-secondary font-sans-md text-xs mb-1 uppercase tracking-widest">
+      <Text className="text-secondary dark:text-secondary-dark font-sans-md text-xs mb-1 uppercase tracking-widest">
         {label}
       </Text>
-      <Text className="text-primary font-sans-bold text-lg">
+      <Text className="text-primary dark:text-primary-dark font-sans-bold text-lg">
         {formatCurrency(value)}
       </Text>
       {delta !== undefined && delta !== 0 && (
@@ -42,35 +41,41 @@ function SummaryCol({ label, value, delta }: ColProps) {
 }
 
 export function NetSummaryCard({ summary }: Props) {
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
-    <View className="bg-surface mx-4 rounded-xl p-4">
-      <View className="flex-row justify-between mb-4">
-        <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
-          Net This Month
-        </Text>
-        <TouchableOpacity onPress={underConstruction}>
-          <Text className="text-accent font-sans-md text-sm">cash flow &gt;</Text>
-        </TouchableOpacity>
+    <>
+      <View className="bg-surface dark:bg-surface-dark mx-4 rounded-xl p-4">
+        <View className="flex-row justify-between mb-4">
+          <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest">
+            Net This Month
+          </Text>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Text className="text-accent font-sans-md text-sm">cash flow &gt;</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View className="flex-row">
+          <SummaryCol
+            label="Income"
+            value={summary.totalIncome}
+            delta={summary.totalIncome - summary.priorMonthTotalIncome}
+          />
+          <View className="w-px bg-separator dark:bg-separator-dark" />
+          <SummaryCol
+            label="Spend"
+            value={summary.totalSpent}
+            delta={summary.totalSpent - summary.priorMonthTotalSpent}
+          />
+          <View className="w-px bg-separator dark:bg-separator-dark" />
+          <SummaryCol
+            label="Excluded"
+            value={summary.totalExcluded}
+          />
+        </View>
       </View>
 
-      <View className="flex-row">
-        <SummaryCol
-          label="Income"
-          value={summary.totalIncome}
-          delta={summary.totalIncome - summary.priorMonthTotalIncome}
-        />
-        <View className="w-px bg-separator" />
-        <SummaryCol
-          label="Spend"
-          value={summary.totalSpent}
-          delta={summary.totalSpent - summary.priorMonthTotalSpent}
-        />
-        <View className="w-px bg-separator" />
-        <SummaryCol
-          label="Excluded"
-          value={summary.totalExcluded}
-        />
-      </View>
-    </View>
+      <UnderConstructionModal visible={modalVisible} onClose={() => setModalVisible(false)} />
+    </>
   );
 }

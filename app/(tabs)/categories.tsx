@@ -1,8 +1,5 @@
 /**
  * Categories Screen — PRD §2.2
- *
- * Shows month selector, summary card, bar chart, category budget rows,
- * and CategoryDetailSheet on tap.
  */
 import { useMemo } from 'react';
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
@@ -15,7 +12,7 @@ import { useUIStore } from '../../src/stores/uiStore';
 import { BudgetBar } from '../../src/components/common/BudgetBar';
 import { CategoryBarChart } from '../../src/components/charts/CategoryBarChart';
 import { CategoryDetailSheet } from '../../src/components/sheets/CategoryDetailSheet';
-import { colors, getBudgetColor } from '../../src/theme/colors';
+import { useColors, getBudgetColor } from '../../src/theme/colors';
 
 function formatCurrency(n: number) {
   return `$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -30,6 +27,7 @@ function formatMonth(ym: string) {
 }
 
 export default function CategoriesScreen() {
+  const colors = useColors();
   const { categories, categoriesBySpend, categorySpending, totalBudget, totalSpent } =
     useCategories();
   const { allTransactions } = useTransactions();
@@ -99,7 +97,7 @@ export default function CategoriesScreen() {
   const overallBarColor = getBudgetColor(totalSpent, totalBudget, currentDay, daysInMonth);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-4 pb-8"
@@ -110,7 +108,7 @@ export default function CategoriesScreen() {
           <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToPrevMonth(); }} className="p-2">
             <ChevronLeft color={colors.textSecondary} size={20} />
           </TouchableOpacity>
-          <Text className="text-primary font-sans-semi text-lg mx-3">
+          <Text className="text-primary dark:text-primary-dark font-sans-semi text-lg mx-3">
             {formatMonth(selectedMonth)}
           </Text>
           <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToNextMonth(); }} className="p-2">
@@ -119,17 +117,17 @@ export default function CategoriesScreen() {
         </View>
 
         {/* Summary card */}
-        <View className="bg-surface rounded-xl p-4 mb-4">
+        <View className="bg-surface dark:bg-surface-dark rounded-xl p-4 mb-4">
           <View className="flex-row justify-between mb-2">
-            <Text className="text-primary font-sans-bold text-xl">
+            <Text className="text-primary dark:text-primary-dark font-sans-bold text-xl">
               {formatCurrency(totalSpent)}
-              <Text className="text-secondary font-sans text-sm"> / {formatCurrency(totalBudget)}</Text>
+              <Text className="text-secondary dark:text-secondary-dark font-sans text-sm"> / {formatCurrency(totalBudget)}</Text>
             </Text>
-            <Text className="text-secondary font-sans-md text-sm self-end">
+            <Text className="text-secondary dark:text-secondary-dark font-sans-md text-sm self-end">
               {Math.round(overallRatio * 100)}%
             </Text>
           </View>
-          <View className="h-2 bg-surface-raised rounded-full overflow-hidden">
+          <View className="h-2 bg-surface-raised dark:bg-surface-raised-dark rounded-full overflow-hidden">
             <View
               className="h-2 rounded-full"
               style={{ width: `${overallRatio * 100}%`, backgroundColor: overallBarColor }}
@@ -138,21 +136,22 @@ export default function CategoriesScreen() {
         </View>
 
         {/* Bar chart card */}
-        <View className="bg-surface rounded-xl p-4 mb-4">
-          <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest mb-3">
+        <View className="bg-surface dark:bg-surface-dark rounded-xl p-4 mb-4">
+          <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest mb-3">
             Spending by Category
           </Text>
           <CategoryBarChart data={barData} maxValue={barMaxValue} />
         </View>
 
-        {/* Category rows */}
+        {/* Empty state */}
         {categoriesBySpend.length === 0 && (
           <View className="items-center py-16">
             <Text className="text-4xl mb-3">📊</Text>
-            <Text className="text-secondary font-sans text-base">No categories yet</Text>
+            <Text className="text-secondary dark:text-secondary-dark font-sans text-base">No categories yet</Text>
           </View>
         )}
 
+        {/* Category rows */}
         {categoriesBySpend.map((cat) => (
           <TouchableOpacity
             key={cat.id}
@@ -161,7 +160,7 @@ export default function CategoriesScreen() {
               openCategorySheet(cat.id);
             }}
             activeOpacity={0.7}
-            className="bg-surface rounded-xl p-4 mb-2"
+            className="bg-surface dark:bg-surface-dark rounded-xl p-4 mb-2"
           >
             <BudgetBar
               category={cat}

@@ -10,9 +10,9 @@ export function FilterChip({ label, active, onPress }: Props) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`rounded-full px-3 py-1.5 ${active ? 'bg-accent' : 'bg-input'}`}
+      className={`rounded-full px-3 py-1.5 ${active ? 'bg-accent' : 'bg-input dark:bg-input-dark'}`}
     >
-      <Text className={`font-sans-md text-sm ${active ? 'text-white' : 'text-secondary'}`}>
+      <Text className={`font-sans-md text-sm ${active ? 'text-white' : 'text-secondary dark:text-secondary-dark'}`}>
         {label} {active ? '✕' : '▾'}
       </Text>
     </TouchableOpacity>

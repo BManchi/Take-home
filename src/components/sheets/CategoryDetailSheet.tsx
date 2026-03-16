@@ -2,7 +2,7 @@ import { Modal, View, Text, TouchableOpacity, ScrollView, useWindowDimensions } 
 import { X } from 'lucide-react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import type { Category } from '../../types';
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/colors';
 
 interface Props {
   category: Category | null;
@@ -24,32 +24,32 @@ function formatCurrency(n: number) {
 }
 
 export function CategoryDetailSheet({ category, monthlyHistory, visible, onClose }: Props) {
+  const colors = useColors();
   const { width } = useWindowDimensions();
   const chartWidth = width - 80;
 
-  // History is returned newest-first; reverse for chart (oldest→newest left→right)
   const chartHistory = [...monthlyHistory].reverse();
   const chartData = chartHistory.map((m) => ({ value: m.spent }));
 
   return (
     <Modal animationType="slide" presentationStyle="pageSheet" visible={visible} onRequestClose={onClose}>
-      <View className="flex-1 bg-surface-raised rounded-t-3xl pt-2 px-4">
+      <View style={{ flex: 1, backgroundColor: colors.surfaceRaised, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 8, paddingHorizontal: 16 }}>
         {/* Drag handle */}
-        <View className="w-10 h-1 bg-tertiary rounded-full mx-auto mt-2 mb-4" />
+        <View style={{ width: 40, height: 4, backgroundColor: colors.textTertiary, borderRadius: 2, alignSelf: 'center', marginTop: 8, marginBottom: 16 }} />
 
         {/* Header row */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="font-sans-bold text-2xl text-primary">
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Text style={{ color: colors.textPrimary, fontFamily: 'Inter_700Bold', fontSize: 24 }}>
             {category?.emoji} {category?.name}
           </Text>
-          <TouchableOpacity onPress={onClose} className="p-2">
+          <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
             <X color={colors.textSecondary} size={20} />
           </TouchableOpacity>
         </View>
 
         {/* Mini line chart */}
         {chartData.length >= 2 && (
-          <View className="overflow-hidden mb-4">
+          <View style={{ overflow: 'hidden', marginBottom: 16 }}>
             <LineChart
               data={chartData}
               width={chartWidth}
@@ -72,11 +72,12 @@ export function CategoryDetailSheet({ category, monthlyHistory, visible, onClose
           {monthlyHistory.map((m) => (
             <View
               key={m.month}
-              className="flex-row justify-between py-3"
-              style={{ borderBottomWidth: 0.5, borderBottomColor: colors.separator }}
+              style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: colors.separator }}
             >
-              <Text className="text-secondary text-sm font-sans">{formatMonthLabel(m.month)}</Text>
-              <Text className="text-secondary text-sm font-sans">
+              <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: 'Inter_400Regular' }}>
+                {formatMonthLabel(m.month)}
+              </Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: 'Inter_400Regular' }}>
                 {formatCurrency(m.spent)} / {formatCurrency(m.budget)}
               </Text>
             </View>

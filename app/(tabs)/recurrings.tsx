@@ -1,23 +1,19 @@
 /**
- * Recurrings Screen
- *
- * PRD Navigation Map — Tab 5. Shows recurring transactions in list or grid view.
- * Sections: This Month (paid / unpaid), In the Future, Paused, Archived.
- *
- * Build task: implement RecurringCard, list/grid toggle, and CreateRecurringSheet.
+ * Recurrings Screen — Tab 5.
  */
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useAccountStore } from '../../src/stores/accountStore';
-import { colors } from '../../src/theme/colors';
+import { useColors } from '../../src/theme/colors';
 
 function formatCurrency(n: number) {
   return `$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export default function RecurringsScreen() {
+  const colors = useColors();
   const { recurrings } = useAccountStore();
 
   const active = recurrings.filter((r) => r.status === 'active');
@@ -29,7 +25,10 @@ export default function RecurringsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16 }}>
           <View>
@@ -38,7 +37,10 @@ export default function RecurringsScreen() {
               {formatCurrency(totalMonthly)}/mo · {active.length} active
             </Text>
           </View>
-          <TouchableOpacity style={{ width: 32, height: 32, backgroundColor: colors.accent, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}>
+          <TouchableOpacity
+            style={{ width: 32, height: 32, backgroundColor: colors.accent, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
+            activeOpacity={0.7}
+          >
             <Plus color="#fff" size={16} />
           </TouchableOpacity>
         </View>
@@ -47,6 +49,7 @@ export default function RecurringsScreen() {
         <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 10 }}>
           This Month
         </Text>
+
         {active.length === 0 && (
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
             <Text style={{ fontSize: 36, marginBottom: 8 }}>🔄</Text>
@@ -55,7 +58,12 @@ export default function RecurringsScreen() {
         )}
 
         {active.map((r) => (
-          <TouchableOpacity key={r.id} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }} activeOpacity={0.7}>
+          <TouchableOpacity
+            key={r.id}
+            onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+            style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}
+            activeOpacity={0.7}
+          >
             <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.surfaceRaised, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
               <Text style={{ fontSize: 22 }}>{r.emoji}</Text>
             </View>

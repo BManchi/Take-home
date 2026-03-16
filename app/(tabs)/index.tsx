@@ -4,7 +4,8 @@
  * Sections: SpendingGraph, ToReview, Budgets, Upcoming, NetThisMonth.
  * Data: useDashboard() + useTransactions() hooks → Zustand stores.
  */
-import { ScrollView, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { useState } from 'react';
+import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -16,14 +17,11 @@ import { TransactionItem } from '../../src/components/cards/TransactionItem';
 import { BudgetBar } from '../../src/components/common/BudgetBar';
 import { UpcomingCard } from '../../src/components/cards/UpcomingCard';
 import { NetSummaryCard } from '../../src/components/cards/NetSummaryCard';
-import { colors } from '../../src/theme/colors';
+import { UnderConstructionModal } from '../../src/components/common/UnderConstructionModal';
+import { useColors } from '../../src/theme/colors';
 
 function formatCurrency(n: number) {
   return `$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function underConstruction() {
-  Alert.alert('Under Construction', 'This feature is coming soon! 🚧');
 }
 
 function formatMonth(ym: string) {
@@ -35,6 +33,7 @@ function formatMonth(ym: string) {
 }
 
 export default function DashboardScreen() {
+  const colors = useColors();
   const {
     summary,
     topBudgetCategories,
@@ -46,14 +45,14 @@ export default function DashboardScreen() {
   } = useDashboard();
   const { pendingReview, markAllReviewed } = useTransactions();
   const { openTransactionSheet } = useUIStore();
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // Current day of month for budget color logic
   const today = new Date();
   const currentDay =
     today.toISOString().slice(0, 7) === selectedMonth ? today.getDate() : daysInMonth;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-8"
@@ -64,7 +63,7 @@ export default function DashboardScreen() {
           <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToPrevMonth(); }} className="p-2">
             <ChevronLeft color={colors.textSecondary} size={20} />
           </TouchableOpacity>
-          <Text className="text-primary font-sans-semi text-lg mx-3">
+          <Text className="text-primary dark:text-primary-dark font-sans-semi text-lg mx-3">
             {formatMonth(selectedMonth)}
           </Text>
           <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); goToNextMonth(); }} className="p-2">
@@ -73,11 +72,11 @@ export default function DashboardScreen() {
         </View>
 
         {/* ── Spending pace card ── */}
-        <View className="bg-surface mx-4 rounded-xl p-5 mb-4">
-          <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest mb-1">
+        <View className="bg-surface dark:bg-surface-dark mx-4 rounded-xl p-5 mb-4">
+          <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest mb-1">
             Free to Spend
           </Text>
-          <Text className="text-primary font-sans-bold text-4xl mb-4">
+          <Text className="text-primary dark:text-primary-dark font-sans-bold text-4xl mb-4">
             {formatCurrency(summary.freeToSpend)}
           </Text>
           <SpendingLineChart
@@ -88,14 +87,14 @@ export default function DashboardScreen() {
 
         {/* ── To Review ── */}
         {pendingReview.length > 0 && (
-          <View className="bg-surface mx-4 rounded-xl p-4 mb-4">
+          <View className="bg-surface dark:bg-surface-dark mx-4 rounded-xl p-4 mb-4">
             <View className="flex-row justify-between mb-3">
-              <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
+              <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest">
                 To Review ({pendingReview.length})
               </Text>
-              <TouchableOpacity onPress={underConstruction}>
-              <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
+              </TouchableOpacity>
             </View>
 
             {pendingReview.slice(0, 5).map((txn, idx) => (
@@ -115,7 +114,7 @@ export default function DashboardScreen() {
               className="mt-3 py-2.5 items-center border rounded-lg"
               style={{ borderColor: colors.separator }}
             >
-              <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
+              <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest">
                 Mark All as Reviewed
               </Text>
             </TouchableOpacity>
@@ -123,12 +122,12 @@ export default function DashboardScreen() {
         )}
 
         {/* ── Budgets ── */}
-        <View className="bg-surface mx-4 rounded-xl p-4 mb-4">
+        <View className="bg-surface dark:bg-surface-dark mx-4 rounded-xl p-4 mb-4">
           <View className="flex-row justify-between mb-3">
-            <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
+            <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest">
               Budgets
             </Text>
-            <TouchableOpacity onPress={underConstruction}>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
               <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
             </TouchableOpacity>
           </View>
@@ -148,10 +147,10 @@ export default function DashboardScreen() {
         {upcomingRecurrings.length > 0 && (
           <View className="mb-4">
             <View className="flex-row justify-between px-4 mb-2.5">
-              <Text className="text-secondary font-sans-semi text-xs uppercase tracking-widest">
+              <Text className="text-secondary dark:text-secondary-dark font-sans-semi text-xs uppercase tracking-widest">
                 Upcoming
               </Text>
-              <TouchableOpacity onPress={underConstruction}>
+              <TouchableOpacity onPress={() => setModalVisible(true)}>
                 <Text className="text-accent font-sans-md text-sm">view all &gt;</Text>
               </TouchableOpacity>
             </View>
@@ -170,6 +169,8 @@ export default function DashboardScreen() {
         {/* ── Net This Month ── */}
         <NetSummaryCard summary={summary} />
       </ScrollView>
+
+      <UnderConstructionModal visible={modalVisible} onClose={() => setModalVisible(false)} />
     </SafeAreaView>
   );
 }

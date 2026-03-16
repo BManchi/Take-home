@@ -5,40 +5,49 @@ module.exports = {
     './src/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
+  darkMode: 'media',
   theme: {
     extend: {
       colors: {
-        // ── Backgrounds ──────────────────────────────────────────────────
-        background:      '#0E0E10',
-        surface:         '#1C1C1E',
-        'surface-raised': '#2C2C2E',
-        input:           '#2C2C2E',
+        // ── Backgrounds — light defaults / dark overrides ─────────────────────
+        background:            '#F2F2F7',
+        'background-dark':     '#0E0E10',
+        surface:               '#FFFFFF',
+        'surface-dark':        '#1C1C1E',
+        'surface-raised':      '#EFEFF4',
+        'surface-raised-dark': '#2C2C2E',
+        input:                 '#E5E5EA',
+        'input-dark':          '#2C2C2E',
 
-        // ── Text ─────────────────────────────────────────────────────────
-        primary:         '#FFFFFF',
-        secondary:       '#8E8E93',
-        tertiary:        '#636366',
+        // ── Text ─────────────────────────────────────────────────────────────
+        primary:               '#000000',
+        'primary-dark':        '#FFFFFF',
+        secondary:             '#6C6C70',
+        'secondary-dark':      '#8E8E93',
+        tertiary:              '#AEAEB2',
+        'tertiary-dark':       '#636366',
 
-        // ── Accent ───────────────────────────────────────────────────────
-        accent:          '#0A84FF',
+        // ── Structural ───────────────────────────────────────────────────────
+        separator:             '#C6C6C8',
+        'separator-dark':      '#38383A',
 
-        // ── Budget/Spending States ────────────────────────────────────────
+        // ── Accent (same in both modes) ───────────────────────────────────────
+        accent: '#0A84FF',
+
+        // ── Budget/Spending States ────────────────────────────────────────────
         'budget-green':        '#34C759',
         'budget-light-orange': '#FF9F0A',
         'budget-dark-orange':  '#FF6B00',
         'budget-red':          '#FF3B30',
 
-        // ── Income ───────────────────────────────────────────────────────
+        // ── Income ───────────────────────────────────────────────────────────
         'income-green': '#34C759',
-
-        // ── Structural ───────────────────────────────────────────────────
-        separator: '#38383A',
       },
       fontFamily: {
-        sans:       ['Inter_400Regular', 'System'],
-        'sans-md':  ['Inter_500Medium', 'System'],
-        'sans-semi':['Inter_600SemiBold', 'System'],
-        'sans-bold':['Inter_700Bold', 'System'],
+        sans:        ['Inter_400Regular', 'System'],
+        'sans-md':   ['Inter_500Medium', 'System'],
+        'sans-semi': ['Inter_600SemiBold', 'System'],
+        'sans-bold': ['Inter_700Bold', 'System'],
       },
     },
   },

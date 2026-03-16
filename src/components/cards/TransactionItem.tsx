@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import type { Transaction } from '../../types';
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/colors';
 
 interface Props {
   transaction: Transaction;
@@ -19,6 +19,7 @@ function formatDate(dateStr: string) {
 }
 
 export function TransactionItem({ transaction: txn, isLast, onPress }: Props) {
+  const colors = useColors();
   const isIncome = txn.type === 'income';
   const amountColor = isIncome ? colors.incomeGreen : colors.textPrimary;
   const needsReview = !txn.reviewed && txn.type === 'regular';
@@ -33,15 +34,12 @@ export function TransactionItem({ transaction: txn, isLast, onPress }: Props) {
       style={!isLast ? { borderBottomWidth: 0.5, borderBottomColor: colors.separator } : undefined}
     >
       {/* Review dot */}
-      <View
-        className="w-2 h-2 rounded-full mr-3"
-        style={{ backgroundColor: dotColor }}
-      />
+      <View className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: dotColor }} />
 
       {/* Merchant + date */}
       <View className="flex-1">
-        <Text className="text-primary font-sans text-base">{txn.merchantName}</Text>
-        <Text className="text-tertiary font-sans text-xs mt-0.5">{formatDate(txn.date)}</Text>
+        <Text className="text-primary dark:text-primary-dark font-sans text-base">{txn.merchantName}</Text>
+        <Text className="text-tertiary dark:text-tertiary-dark font-sans text-xs mt-0.5">{formatDate(txn.date)}</Text>
       </View>
 
       {/* Amount */}

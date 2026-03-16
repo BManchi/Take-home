@@ -1,11 +1,9 @@
 /**
  * NetWorthChart — renders the net worth line chart on the Accounts screen.
- * Uses react-native-gifted-charts LineChart with area fill.
- * Data points come from synthesized monthly snapshots in useAccounts().
  */
 import { useWindowDimensions, View, Text } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/colors';
 
 interface DataPoint {
   date: string;
@@ -14,12 +12,12 @@ interface DataPoint {
 
 interface Props {
   data: DataPoint[];
-  positive: boolean; // whether net worth change is positive (affects line color)
+  positive: boolean;
 }
 
 export function NetWorthChart({ data, positive }: Props) {
+  const colors = useColors();
   const { width } = useWindowDimensions();
-  // 16px horizontal margin × 2 + 16px card padding × 2 = 64px
   const chartWidth = width - 64;
 
   if (data.length < 2) {

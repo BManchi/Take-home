@@ -21,7 +21,7 @@ import { seedDatabase } from '../src/database/seed';
 import { useTransactionStore } from '../src/stores/transactionStore';
 import { useCategoryStore } from '../src/stores/categoryStore';
 import { useAccountStore } from '../src/stores/accountStore';
-import { colors } from '../src/theme/colors';
+import { useColors } from '../src/theme/colors';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,6 +36,7 @@ async function initDb(): Promise<void> {
 }
 
 export default function RootLayout() {
+  const colors = useColors();
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,

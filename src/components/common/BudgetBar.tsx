@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import type { Category } from '../../types';
-import { getBudgetColor, colors } from '../../theme/colors';
+import { getBudgetColor, useColors } from '../../theme/colors';
 
 interface Props {
   category: Category;
@@ -14,6 +14,7 @@ function formatCurrency(n: number) {
 }
 
 export function BudgetBar({ category, spent, currentDay, daysInMonth }: Props) {
+  const colors = useColors();
   const budget = category.budgetAmount ?? 0;
   const ratio = budget > 0 ? Math.min(spent / budget, 1) : 0;
   const remaining = budget - spent;
@@ -22,7 +23,7 @@ export function BudgetBar({ category, spent, currentDay, daysInMonth }: Props) {
   return (
     <View className="mb-3.5">
       <View className="flex-row justify-between mb-1">
-        <Text className="text-primary font-sans text-base">
+        <Text className="text-primary dark:text-primary-dark font-sans text-base">
           {category.emoji}{'  '}{category.name}
         </Text>
         <Text
@@ -36,7 +37,7 @@ export function BudgetBar({ category, spent, currentDay, daysInMonth }: Props) {
       </View>
 
       {/* Track */}
-      <View className="h-1.5 bg-surface-raised rounded-full overflow-hidden">
+      <View className="h-1.5 bg-surface-raised dark:bg-surface-raised-dark rounded-full overflow-hidden">
         {/* Fill */}
         <View
           className="h-1.5 rounded-full"

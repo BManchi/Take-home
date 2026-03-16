@@ -1,8 +1,5 @@
 /**
  * Accounts Screen — PRD §2.5
- *
- * Net worth line chart with timeframe selector, connection alerts,
- * and accounts grouped by type (Credit Cards, Cash & Checking, Investments, Loans).
  */
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +7,7 @@ import { Plus, TrendingUp, TrendingDown } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useAccounts } from '../../src/hooks/useAccounts';
 import { NetWorthChart } from '../../src/components/charts/NetWorthChart';
-import { colors, getUtilizationColor } from '../../src/theme/colors';
+import { useColors, getUtilizationColor } from '../../src/theme/colors';
 import type { Account } from '../../src/types';
 
 function formatCurrency(n: number) {
@@ -28,8 +25,8 @@ function formatPercent(p: number) {
 
 const TIME_RANGES = ['1W', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'] as const;
 
-// ── Alert background color (warm dark amber — not available as a standard token) ──
-const ALERT_SURFACE = '#2C1B0E';
+const ALERT_BG_DARK  = '#2C1B0E';
+const ALERT_BG_LIGHT = '#FFF3E0';
 
 interface AccountRowProps {
   account: Account;
@@ -38,6 +35,7 @@ interface AccountRowProps {
 }
 
 function AccountRow({ account, change, isLast }: AccountRowProps) {
+  const colors = useColors();
   const isCredit = account.type === 'credit_card';
   const isPositiveChange = (change?.delta ?? 0) >= 0;
 
@@ -53,39 +51,19 @@ function AccountRow({ account, change, isLast }: AccountRowProps) {
       activeOpacity={0.7}
     >
       <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            color: colors.textPrimary,
-            fontSize: 15,
-            fontFamily: 'Inter_400Regular',
-          }}
-        >
+        <Text style={{ color: colors.textPrimary, fontSize: 15, fontFamily: 'Inter_400Regular' }}>
           {account.institutionName} {account.accountName}
         </Text>
-        <Text
-          style={{
-            color: colors.textTertiary,
-            fontSize: 12,
-            fontFamily: 'Inter_400Regular',
-            marginTop: 1,
-          }}
-        >
+        <Text style={{ color: colors.textTertiary, fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 1 }}>
           ••{account.accountNumberMask}
         </Text>
       </View>
 
       <View style={{ alignItems: 'flex-end' }}>
-        <Text
-          style={{
-            color: colors.textPrimary,
-            fontSize: 15,
-            fontFamily: 'Inter_600SemiBold',
-          }}
-        >
+        <Text style={{ color: colors.textPrimary, fontSize: 15, fontFamily: 'Inter_600SemiBold' }}>
           {formatCurrency(account.balance)}
         </Text>
 
-        {/* Credit cards: show utilization dot + percent */}
         {isCredit && account.creditUtilization != null && (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
             <View
@@ -97,19 +75,12 @@ function AccountRow({ account, change, isLast }: AccountRowProps) {
                 marginRight: 4,
               }}
             />
-            <Text
-              style={{
-                color: colors.textSecondary,
-                fontSize: 12,
-                fontFamily: 'Inter_400Regular',
-              }}
-            >
+            <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
               {Math.round(account.creditUtilization * 100)}% util
             </Text>
           </View>
         )}
 
-        {/* Non-credit accounts: show percent change over selected time range */}
         {!isCredit && change && (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 3 }}>
             {isPositiveChange ? (
@@ -117,13 +88,7 @@ function AccountRow({ account, change, isLast }: AccountRowProps) {
             ) : (
               <TrendingDown color={colors.budgetRed} size={11} />
             )}
-            <Text
-              style={{
-                color: isPositiveChange ? colors.budgetGreen : colors.budgetRed,
-                fontSize: 12,
-                fontFamily: 'Inter_500Medium',
-              }}
-            >
+            <Text style={{ color: isPositiveChange ? colors.budgetGreen : colors.budgetRed, fontSize: 12, fontFamily: 'Inter_500Medium' }}>
               {formatPercent(change.percent)}
             </Text>
           </View>
@@ -134,6 +99,7 @@ function AccountRow({ account, change, isLast }: AccountRowProps) {
 }
 
 export default function AccountsScreen() {
+  const colors = useColors();
   const {
     netWorth,
     totalAssets,
@@ -148,38 +114,21 @@ export default function AccountsScreen() {
   } = useAccounts();
 
   const isPositive = netWorthChange.delta >= 0;
+  const alertBg = colors.background === '#F2F2F7' ? ALERT_BG_LIGHT : ALERT_BG_DARK;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── Header ── */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 16,
-            paddingVertical: 16,
-          }}
-        >
-          <Text
-            style={{
-              color: colors.textPrimary,
-              fontSize: 22,
-              fontFamily: 'Inter_700Bold',
-            }}
-          >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 }}>
+          <Text style={{ color: colors.textPrimary, fontSize: 22, fontFamily: 'Inter_700Bold' }}>
             Accounts
           </Text>
           <TouchableOpacity
-            style={{
-              width: 32,
-              height: 32,
-              backgroundColor: colors.accent,
-              borderRadius: 16,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={{ width: 32, height: 32, backgroundColor: colors.accent, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
             activeOpacity={0.7}
           >
             <Plus color="#fff" size={16} />
@@ -187,62 +136,23 @@ export default function AccountsScreen() {
         </View>
 
         {/* ── Net Worth card ── */}
-        <View
-          style={{
-            backgroundColor: colors.surface,
-            marginHorizontal: 16,
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 16,
-          }}
-        >
-          {/* Label */}
-          <Text
-            style={{
-              color: colors.textSecondary,
-              fontSize: 11,
-              fontFamily: 'Inter_600SemiBold',
-              letterSpacing: 0.8,
-              textTransform: 'uppercase',
-              marginBottom: 4,
-            }}
-          >
+        <View style={{ backgroundColor: colors.surface, marginHorizontal: 16, borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>
             Net Worth
           </Text>
 
-          {/* Value + change */}
-          <Text
-            style={{
-              color: colors.textPrimary,
-              fontSize: 32,
-              fontFamily: 'Inter_700Bold',
-              marginBottom: 4,
-            }}
-          >
+          <Text style={{ color: colors.textPrimary, fontSize: 32, fontFamily: 'Inter_700Bold', marginBottom: 4 }}>
             {formatCurrency(netWorth)}
           </Text>
 
           {netWorthHistory.length >= 2 && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                marginBottom: 12,
-              }}
-            >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 }}>
               {isPositive ? (
                 <TrendingUp color={colors.budgetGreen} size={14} />
               ) : (
                 <TrendingDown color={colors.budgetRed} size={14} />
               )}
-              <Text
-                style={{
-                  color: isPositive ? colors.budgetGreen : colors.budgetRed,
-                  fontSize: 13,
-                  fontFamily: 'Inter_500Medium',
-                }}
-              >
+              <Text style={{ color: isPositive ? colors.budgetGreen : colors.budgetRed, fontSize: 13, fontFamily: 'Inter_500Medium' }}>
                 {isPositive ? '+' : ''}{formatCurrency(netWorthChange.delta)}{' '}
                 ({formatPercent(netWorthChange.percent)})
               </Text>
@@ -262,79 +172,28 @@ export default function AccountsScreen() {
                   paddingHorizontal: 10,
                   paddingVertical: 4,
                   borderRadius: 100,
-                  backgroundColor:
-                    netWorthTimeRange === range ? colors.accent : colors.input,
+                  backgroundColor: netWorthTimeRange === range ? colors.accent : colors.input,
                 }}
                 activeOpacity={0.7}
               >
-                <Text
-                  style={{
-                    color: netWorthTimeRange === range ? '#fff' : colors.textSecondary,
-                    fontSize: 12,
-                    fontFamily: 'Inter_500Medium',
-                  }}
-                >
+                <Text style={{ color: netWorthTimeRange === range ? '#fff' : colors.textSecondary, fontSize: 12, fontFamily: 'Inter_500Medium' }}>
                   {range}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          {/* Net worth line chart */}
           <NetWorthChart data={netWorthHistory} positive={isPositive} />
 
-          {/* Assets / Liabilities sub-row */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginTop: 12,
-              paddingTop: 12,
-              borderTopWidth: 0.5,
-              borderTopColor: colors.separator,
-            }}
-          >
+          {/* Assets / Liabilities */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: colors.separator }}>
             <View>
-              <Text
-                style={{
-                  color: colors.textTertiary,
-                  fontSize: 11,
-                  fontFamily: 'Inter_400Regular',
-                  marginBottom: 2,
-                }}
-              >
-                Assets
-              </Text>
-              <Text
-                style={{
-                  color: colors.budgetGreen,
-                  fontSize: 14,
-                  fontFamily: 'Inter_600SemiBold',
-                }}
-              >
-                {formatCurrency(totalAssets)}
-              </Text>
+              <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: 'Inter_400Regular', marginBottom: 2 }}>Assets</Text>
+              <Text style={{ color: colors.budgetGreen, fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>{formatCurrency(totalAssets)}</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text
-                style={{
-                  color: colors.textTertiary,
-                  fontSize: 11,
-                  fontFamily: 'Inter_400Regular',
-                  marginBottom: 2,
-                }}
-              >
-                Liabilities
-              </Text>
-              <Text
-                style={{
-                  color: colors.budgetRed,
-                  fontSize: 14,
-                  fontFamily: 'Inter_600SemiBold',
-                }}
-              >
-                {formatCurrency(totalLiabilities)}
-              </Text>
+              <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: 'Inter_400Regular', marginBottom: 2 }}>Liabilities</Text>
+              <Text style={{ color: colors.budgetRed, fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>{formatCurrency(totalLiabilities)}</Text>
             </View>
           </View>
         </View>
@@ -343,44 +202,19 @@ export default function AccountsScreen() {
         {alertAccounts.map((acc) => (
           <View
             key={acc.id}
-            style={{
-              backgroundColor: ALERT_SURFACE,
-              marginHorizontal: 16,
-              borderRadius: 12,
-              padding: 14,
-              marginBottom: 12,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
+            style={{ backgroundColor: alertBg, marginHorizontal: 16, borderRadius: 12, padding: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center' }}
           >
             <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  color: colors.budgetLightOrange,
-                  fontSize: 13,
-                  fontFamily: 'Inter_600SemiBold',
-                }}
-              >
+              <Text style={{ color: colors.budgetLightOrange, fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>
                 ⚠ {acc.institutionName}
               </Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-                stopped syncing data
-              </Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 12 }}>stopped syncing data</Text>
             </View>
             <TouchableOpacity
-              style={{
-                backgroundColor: colors.budgetLightOrange,
-                borderRadius: 8,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-              }}
+              style={{ backgroundColor: colors.budgetLightOrange, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}
               activeOpacity={0.7}
             >
-              <Text
-                style={{ color: '#000', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}
-              >
-                REVERIFY
-              </Text>
+              <Text style={{ color: '#000', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>REVERIFY</Text>
             </TouchableOpacity>
           </View>
         ))}
@@ -389,40 +223,13 @@ export default function AccountsScreen() {
         {groupedAccounts.map(({ label, accounts, total }) => (
           <View
             key={label}
-            style={{
-              backgroundColor: colors.surface,
-              marginHorizontal: 16,
-              borderRadius: 12,
-              padding: 16,
-              marginBottom: 12,
-            }}
+            style={{ backgroundColor: colors.surface, marginHorizontal: 16, borderRadius: 12, padding: 16, marginBottom: 12 }}
           >
-            {/* Section header */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 10,
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.textSecondary,
-                  fontSize: 11,
-                  fontFamily: 'Inter_600SemiBold',
-                  letterSpacing: 0.8,
-                  textTransform: 'uppercase',
-                }}
-              >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+              <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8, textTransform: 'uppercase' }}>
                 {label}
               </Text>
-              <Text
-                style={{
-                  color: colors.textPrimary,
-                  fontSize: 15,
-                  fontFamily: 'Inter_700Bold',
-                }}
-              >
+              <Text style={{ color: colors.textPrimary, fontSize: 15, fontFamily: 'Inter_700Bold' }}>
                 {formatCurrency(total)}
               </Text>
             </View>
