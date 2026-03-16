@@ -61,7 +61,7 @@ Scan the QR code with Expo Go, or press `i` for iOS simulator / `a` for Android 
 | Recurrings | ![screenshot](./docs/result/screenshots/recurring-dark.png) | ![screenshot](./docs/result/screenshots/recurring.png)
 
 ### Video
-
+<video src="./docs/result/video/copilot-clone-demo.mp4" controls width="300"></video>
 
 ## Approach: AI-Orchestrated Development
 The exercise was treated as a product replication problem, not a UI-only coding task.
@@ -92,6 +92,17 @@ Each phase was executed through Claude Code with the PRD as the primary context 
 | 4 | Polish pass | ~40min |
 
 Between phases, context was compressed to prevent prompt drift and keep the agent focused.
+
+## Time Breakdown
+
+| Phase | Activity | Approx Time |
+|------|----------|-------------|
+| Setup | Project initialization, dependencies | ~30m |
+| Product Reverse Engineering | Help center scraping + PRD | ~35m |
+| Core Architecture | Data models, navigation skeleton | ~45m |
+| Feature Implementation | Dashboard, Categories, Transactions | ~2h |
+| Secondary Screens | Accounts + Detail Sheet | ~45m |
+| Polish | Dark mode, visual consistency | ~45m |
 
 ## Architecture 
 The architecture intentionally mirrors patterns familiar from native mobile development.
@@ -145,7 +156,7 @@ The goal was to implement the most product-defining flows.
  - Spending pace visualization
  - Budget snapshot
  - Recent transactions
-  Upcoming recurring charges
+ - Upcoming recurring charges
  - Monthly net summary
 
 ### Categories / Budgets
