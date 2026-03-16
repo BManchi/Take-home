@@ -1,12 +1,14 @@
 /**
  * Recurrings Screen — Tab 5.
  */
+import { useState } from 'react';
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useAccountStore } from '../../src/stores/accountStore';
 import { useColors } from '../../src/theme/colors';
+import { UnderConstructionModal } from '../../src/components/common/UnderConstructionModal';
 
 function formatCurrency(n: number) {
   return `$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -15,6 +17,7 @@ function formatCurrency(n: number) {
 export default function RecurringsScreen() {
   const colors = useColors();
   const { recurrings } = useAccountStore();
+  const [modalVisible, setModalVisible] = useState(false);
 
   const active = recurrings.filter((r) => r.status === 'active');
   const paused = recurrings.filter((r) => r.status === 'paused');
@@ -38,6 +41,7 @@ export default function RecurringsScreen() {
             </Text>
           </View>
           <TouchableOpacity
+            onPress={() => setModalVisible(true)}
             style={{ width: 32, height: 32, backgroundColor: colors.accent, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
             activeOpacity={0.7}
           >
@@ -101,6 +105,7 @@ export default function RecurringsScreen() {
           </>
         )}
       </ScrollView>
+      <UnderConstructionModal visible={modalVisible} onClose={() => setModalVisible(false)} />
     </SafeAreaView>
   );
 }
